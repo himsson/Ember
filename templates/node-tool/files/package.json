@@ -1,0 +1,7 @@
+{
+  "name": "my-tool",
+  "version": "0.1.0",
+  "private": true,
+  "bin": { "my-tool": "cli.js" },
+  "scripts": { "test": "node --test" }
+}

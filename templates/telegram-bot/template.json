@@ -1,0 +1,5 @@
+{
+  "title": "Telegram bot",
+  "icon": "chat",
+  "prompt": "This folder has a starter Telegram bot in Python (bot.py, standard library only). Make the bot: "
+}

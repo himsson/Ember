@@ -1,0 +1,5 @@
+{
+  "title": "Command-line tool",
+  "icon": "term",
+  "prompt": "This folder has a starter Node.js command-line tool (cli.js, lib.js) with a test. Make the tool: "
+}

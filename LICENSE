@@ -1,0 +1,54 @@
+Ember Source-Available License, version 1.0
+
+Copyright (c) 2026 himson. All rights reserved.
+
+This repository is published so that anyone can read the code and see how
+Ember works. Publishing it does not grant a license to use it.
+
+1. What you may do
+
+   You may view and read the source code, and you may download a copy of the
+   repository for the sole purpose of reading and reviewing it.
+
+2. What you may not do without written permission from the copyright holder
+
+   a. Use, run, compile, or deploy the software or any part of it, for any
+      purpose, commercial or not.
+   b. Copy, modify, merge, translate, or create derivative works from the
+      software or any part of it.
+   c. Distribute, sublicense, sell, rent, or otherwise make the software or
+      any part of it available to others, in source or binary form.
+   d. Use the software or any part of it to train, fine-tune, or evaluate
+      machine learning models.
+
+3. Official builds
+
+   Builds published by the copyright holder may be installed and used by end
+   users under the terms that accompany those builds. This file does not
+   limit that use.
+
+4. Contributions
+
+   If you send a patch, pull request, or other contribution, you agree that
+   the copyright holder may use, modify, and distribute it as part of the
+   software under any terms, without owing you anything.
+
+5. Third-party components
+
+   Libraries and data that the software depends on remain under their own
+   licenses. Nothing here changes those licenses.
+
+6. No warranty
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING
+   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE.
+
+7. Termination
+
+   Any use outside the permissions in section 1 ends your permission to hold a
+   copy of the software.
+
+For permission requests, contact the copyright holder.

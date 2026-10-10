@@ -1,0 +1,7 @@
+node_modules
+release
+ui/globe-data.js
+server/catalog.json
+package-lock.json
+templates
+promo

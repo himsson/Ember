@@ -1,0 +1,5 @@
+node_modules/
+release/
+/promo/
+*.log
+.DS_Store

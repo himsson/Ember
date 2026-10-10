@@ -1,0 +1,8 @@
+{
+  "manifest_version": 3,
+  "name": "My extension",
+  "version": "0.1.0",
+  "description": "What the extension does",
+  "action": { "default_popup": "popup.html" },
+  "permissions": ["activeTab", "storage"]
+}

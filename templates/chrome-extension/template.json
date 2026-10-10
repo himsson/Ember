@@ -1,0 +1,5 @@
+{
+  "title": "Browser extension",
+  "icon": "plug",
+  "prompt": "This folder has a starter Chrome extension (manifest.json, popup.html, popup.js). Make the extension: "
+}
