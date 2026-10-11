@@ -5,7 +5,7 @@ function modelName(id) {
   const m = S.lib && S.lib.installed.find((x) => x.id === id);
   return m ? t(m.name) : id.replace(/^\w+:/, '');
 }
-const realModels = () => (S.lib ? S.lib.installed.filter((m) => m.provider !== 'demo') : []);
+const realModels = () => (S.lib ? S.lib.installed : []);
 
 async function patchSession(patch) {
   const view = await api('/api/session/update', { id: S.session.id, patch });
@@ -208,7 +208,6 @@ function renderEmpty() {
           { class: 'callout' },
           h('b', {}, t('No models yet')),
           h('button', { class: 'btn primary', onclick: () => setView('library') }, ic('book'), t('Library')),
-          h('button', { class: 'btn', onclick: () => suggest(t('make a notes app')) }, t('Demo')),
         ),
       S.templates.length
         ? h(

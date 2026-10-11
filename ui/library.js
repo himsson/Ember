@@ -147,7 +147,7 @@ function renderLibrary() {
       h('div', { class: 'foot' }, foot),
     );
   };
-  const mine = L.installed.filter((m) => m.provider !== 'demo');
+  const mine = L.installed;
   const installedCard = (m) =>
     h(
       'div',

@@ -183,17 +183,14 @@ async function main() {
     return quit();
   }
 
-  const real = installed.models.filter((m) => m.provider !== 'demo');
+  const real = installed.models;
   const line = () =>
     dim(
       `  model: ${session.model === 'auto' ? 'auto' : session.model} · mode: ${MODES[session.mode]} · reasoning: ${session.effort} · /help`,
     );
   console.log(`\n${accent('◆')} ${bold('Ember')} ${dim(args.dir)}`);
   console.log(line());
-  if (!real.length)
-    console.log(
-      yellow('  No models yet — the demo is used. Install a model in the app or with "ollama pull".'),
-    );
+  if (!real.length) console.log(yellow('  No models yet. Install one in the app or with "ollama pull".'));
   console.log('');
 
   const commands = {

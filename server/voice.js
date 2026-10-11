@@ -7,13 +7,22 @@ const { unpack } = require('./unpack');
 
 const HOME = process.env.EMBER_HOME || path.join(os.homedir(), '.ember');
 const DIR = path.join(HOME, 'voice');
-const MODEL = path.join(DIR, 'ggml-base.bin');
+// The installer ships speech recognition next to the app; a copy in the user's folder is the fallback.
+const SHIPPED = [
+  process.resourcesPath && path.join(process.resourcesPath, 'voice'),
+  path.join(__dirname, '..', 'vendor', 'voice'),
+].filter((d) => d && fs.existsSync(d));
+const MODEL_NAME = 'ggml-base.bin';
+const findModel = () =>
+  [...SHIPPED, DIR].map((d) => path.join(d, MODEL_NAME)).find((f) => fs.existsSync(f)) ||
+  path.join(DIR, MODEL_NAME);
 const MODEL_URL = 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin';
 const bus = new EventEmitter();
 const win = process.platform === 'win32';
 let progress = null;
 
-function findBinary(dir = DIR, depth = 0) {
+function findBinary(dir, depth = 0) {
+  if (!dir) return [...SHIPPED, DIR].map((d) => findBinary(d)).find(Boolean) || null;
   if (!fs.existsSync(dir) || depth > 3) return null;
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, e.name);
@@ -26,7 +35,7 @@ function findBinary(dir = DIR, depth = 0) {
 }
 
 const status = () => ({
-  installed: !!findBinary() && fs.existsSync(MODEL),
+  installed: !!findBinary() && fs.existsSync(findModel()),
   install: progress,
   canInstall: win || (process.platform === 'linux' && os.arch() === 'x64'),
 });
@@ -73,7 +82,8 @@ async function install() {
       fs.rmSync(file, { force: true });
       if (!win) fs.chmodSync(findBinary(), 0o755);
     }
-    if (!fs.existsSync(MODEL)) await download(MODEL_URL, MODEL, 'Downloading speech recognition', 92, 8);
+    if (!fs.existsSync(findModel()))
+      await download(MODEL_URL, path.join(DIR, MODEL_NAME), 'Downloading speech recognition', 92, 8);
     progress = null;
     bus.emit('progress', { done: true });
   } catch (e) {
@@ -82,7 +92,7 @@ async function install() {
   }
 }
 
-function transcribe(wav, lang, model = MODEL) {
+function transcribe(wav, lang, model = findModel()) {
   const bin = findBinary();
   if (!bin || !fs.existsSync(model)) return Promise.reject(new Error('Speech recognition is not installed'));
   const file = path.join(os.tmpdir(), `ember-voice-${process.pid}-${Date.now()}.wav`);

@@ -5,3 +5,4 @@ server/catalog.json
 package-lock.json
 templates
 promo
+vendor

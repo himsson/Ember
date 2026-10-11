@@ -82,15 +82,13 @@ function modelInfo(m) {
 }
 
 const canSee = (m) =>
-  m.provider === 'demo' ||
-  VISION.test(m.tag) ||
-  !!(catalog.find((c) => c.tag === m.tag.replace(/:latest$/, '')) || {}).vision;
+  VISION.test(m.tag) || !!(catalog.find((c) => c.tag === m.tag.replace(/:latest$/, '')) || {}).vision;
 
 function pickModel(session, installed, hw, userText, needVision) {
   if (session.model && session.model !== 'auto' && installed.models.some((m) => m.id === session.model))
     return session.model;
-  let real = installed.models.filter((m) => m.provider !== 'demo');
-  if (!real.length) return 'demo:demo';
+  let real = installed.models;
+  if (!real.length) return null;
   if (needVision && real.some(canSee)) real = real.filter(canSee);
   const wantCode = CODE_WORDS.test(userText);
   const speed = { fast: 3, ok: 2, slow: 1, no: 0 };
@@ -478,9 +476,13 @@ async function runTurn(s, run) {
   const lastUser = clip([...s.ctx].reverse().find((e) => e.t === 'user').content, 3000);
   const needVision = s.ctx.slice(-KEEP_FULL).some((e) => e.images);
   const modelId = pickModel(s, installed, hw, lastUser, needVision);
+  if (!modelId) {
+    addItem(s, { type: 'error', text: 'No models yet.', hint: 'Install one in the Library.' });
+    return;
+  }
   const picked = installed.models.find((m) => m.id === modelId);
   if (needVision && picked && !canSee(picked)) {
-    const eye = installed.models.find((m) => m.provider !== 'demo' && canSee(m));
+    const eye = installed.models.find(canSee);
     if (!eye) {
       addItem(s, {
         type: 'error',
@@ -539,7 +541,7 @@ async function runTurn(s, run) {
       type: 'notice',
       kind: 'model',
       text: s.activeModel,
-      auto: s.model === 'auto' && !!picked && picked.provider !== 'demo',
+      auto: s.model === 'auto' && !!picked,
       ctx: s.ctxMax,
     });
     s.lastModel = modelId;
@@ -808,10 +810,7 @@ async function runTurn(s, run) {
       if (page) s.preview = page;
       if (page && capture && !looked && !planMode && level.reviews > 0) {
         looked = true;
-        const eye =
-          picked && canSee(picked) && picked.provider !== 'demo'
-            ? picked
-            : installed.models.find((m) => m.provider !== 'demo' && canSee(m));
+        const eye = picked && canSee(picked) ? picked : installed.models.find(canSee);
         const shot = eye ? await capture(path.join(s.cwd, page)).catch(() => null) : null;
         if (shot) {
           const r = await providers
@@ -1196,7 +1195,7 @@ async function send(sid, text, images, attached) {
       addItem(s, {
         type: 'error',
         text: e.message,
-        hint: e.code === 'offline' ? 'Install the engine in the Library or choose the demo model.' : '',
+        hint: e.code === 'offline' ? 'Install the engine in the Library.' : '',
       });
     else addItem(s, { type: 'error', text: 'Internal error: ' + e.message });
   } finally {
@@ -1230,6 +1229,7 @@ async function compactNow(sid) {
   const settings = store.getSettings();
   const installed = await providers.listInstalled(settings);
   const modelId = pickModel(s, installed, hardware.effective(settings), '');
+  if (!modelId) return false;
   runs.set(sid, { abort: new AbortController(), waiting: new Map() });
   pushState(s);
   try {

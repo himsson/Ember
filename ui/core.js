@@ -121,11 +121,16 @@ function placePop(pop, anchor, above) {
   $('#layer').append(pop);
   const r = anchor.getBoundingClientRect();
   const pr = pop.getBoundingClientRect();
-  pop.style.left = Math.max(8, Math.min(r.left, innerWidth - pr.width - 8)) + 'px';
-  pop.style.top =
-    (above && r.top - pr.height - 8 > 8
+  // With a text size other than Medium the page is zoomed: rectangles come back in screen pixels,
+  // while left/top are read in page pixels. Dividing by the zoom keeps the two in step.
+  const k = pop.offsetWidth ? pr.width / pop.offsetWidth : 1;
+  const left = Math.max(8, Math.min(r.left, innerWidth - pr.width - 8));
+  const top =
+    above && r.top - pr.height - 8 > 8
       ? r.top - pr.height - 8
-      : Math.min(r.bottom + 8, innerHeight - pr.height - 8)) + 'px';
+      : Math.max(8, Math.min(r.bottom + 8, innerHeight - pr.height - 8));
+  pop.style.left = left / k + 'px';
+  pop.style.top = top / k + 'px';
   return pop;
 }
 function openPop(anchor, items, { above = true } = {}) {

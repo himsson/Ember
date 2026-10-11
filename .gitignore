@@ -3,3 +3,4 @@ release/
 /promo/
 *.log
 .DS_Store
+vendor/

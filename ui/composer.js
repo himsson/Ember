@@ -273,7 +273,7 @@ function modelMenu(e) {
   for (const m of S.lib ? S.lib.installed : [])
     items.push({
       icon: 'cpu',
-      title: m.provider === 'demo' ? t('Demo') : m.name,
+      title: m.name,
       meta: m.rate ? t(RATE[m.rate.level]) : '',
       on: cur === m.id,
       run: () => guard(patchSession)({ model: m.id }),

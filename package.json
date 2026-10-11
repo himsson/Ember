@@ -13,9 +13,10 @@
     "cli": "node cli.js",
     "dev": "node dev.js",
     "format": "prettier --write \"server/**/*.js\" \"ui/*.js\" \"ui/*.css\" \"scripts/*.js\" main.js preload.js cli.js dev.js",
-    "build": "electron-builder --win",
+    "build": "node scripts/fetch-voice.js && electron-builder --win",
     "icon": "node scripts/make-icon.js",
-    "banner": "electron scripts/make-banner.js"
+    "banner": "electron scripts/make-banner.js",
+    "voice": "node scripts/fetch-voice.js"
   },
   "dependencies": {
     "pdfjs-dist": "^4.10.38"
@@ -63,6 +64,17 @@
       "createDesktopShortcut": true,
       "shortcutName": "Ember",
       "artifactName": "Ember-Setup-${version}.${ext}"
-    }
+    },
+    "extraResources": [
+      {
+        "from": "vendor/voice",
+        "to": "voice",
+        "filter": [
+          "**/*",
+          "!*.part",
+          "!*.zip"
+        ]
+      }
+    ]
   }
 }
