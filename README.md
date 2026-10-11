@@ -25,8 +25,8 @@ Windows may show a blue "Windows protected your PC" window the first time. Press
 ## First steps
 
 1. Ember asks for your language and your name.
-2. Open the Library and press Install on the banner at the top. This downloads the engine that runs the models. You do it once.
-3. Pick a model. Each one is marked Fast, OK, Slow or Won't run for your computer, and one is marked Best pick. If you're not sure, take that one.
+2. Open the Library and pick a model. Each one is marked Fast, OK, Slow or Won't run for your computer, and one is marked Best pick. If you're not sure, take that one.
+3. Press Install. The first time, Ember also downloads the engine that runs the models, about 1.5 GB. That happens once.
 4. Go back to the chat and type what you need.
 
 Models are big files, from 1 to 5 GB for the small ones, so make sure you have the space.

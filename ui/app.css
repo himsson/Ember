@@ -2709,3 +2709,27 @@ button.tag:hover {
   font-style: normal;
   font-weight: 600;
 }
+.sgrid i,
+.sbar {
+  position: relative;
+}
+.stats [data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  transform: translateX(-50%);
+  z-index: 5;
+  padding: 4px 9px;
+  border-radius: 8px;
+  border: 1px solid var(--line-strong);
+  background: var(--bg);
+  color: var(--text);
+  font: 500 12.5px var(--sans);
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.sgrid i:hover {
+  outline: 1px solid var(--accent);
+}

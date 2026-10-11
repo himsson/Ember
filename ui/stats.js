@@ -12,6 +12,11 @@ const short = (n) =>
 const dayKey = (d) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
+const tip = (key, used) =>
+  new Date(key + 'T12:00').toLocaleDateString(LANG, { day: 'numeric', month: 'long' }) +
+  ' · ' +
+  t('{0} tokens', short(used));
+
 function statsCard() {
   const view = S.stats;
   const all = S.usage || {};
@@ -98,7 +103,7 @@ function statsCard() {
             shown.map((k) =>
               h(
                 'div',
-                { class: 'sbar', title: k },
+                { class: 'sbar', 'data-tip': tip(k, all[k].in + all[k].out) },
                 h(
                   'div',
                   { class: 'col', style: `height:${((all[k].in + all[k].out) / peak) * 100}%` },
@@ -148,8 +153,10 @@ function statsCard() {
     const used = day ? day.in + day.out : 0;
     cells.push(
       h('i', {
-        title: dayKey(d),
-        style: used ? `background:var(--accent);opacity:${0.35 + 0.65 * Math.sqrt(used / top)}` : '',
+        'data-tip': tip(dayKey(d), used),
+        style: used
+          ? `background:color-mix(in srgb, var(--accent) ${Math.round(35 + 65 * Math.sqrt(used / top))}%, var(--bg-hover))`
+          : '',
       }),
     );
   }

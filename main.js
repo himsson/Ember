@@ -66,7 +66,8 @@ async function createWindow() {
   win.webContents.once('did-finish-load', reveal);
   setTimeout(reveal, 4000);
   win.loadURL(url);
-  if (process.env.EMBER_SMOKE) {
+  // a self-check used while developing; installed copies ignore it
+  if (!app.isPackaged && process.env.EMBER_SMOKE) {
     win.webContents.once('did-finish-load', async () => {
       await new Promise((r) => setTimeout(r, 2500));
       if (process.env.EMBER_SMOKE_SCRIPT)
@@ -115,7 +116,7 @@ app.on('web-contents-created', (e, contents) => {
 ipcMain.handle('pick-folder', async () => {
   const r = await dialog.showOpenDialog(win, {
     properties: ['openDirectory', 'createDirectory'],
-    title: 'Папка проекта',
+    title: 'Project folder',
   });
   return r.canceled ? null : r.filePaths[0];
 });
