@@ -108,6 +108,7 @@ const ollama = {
     let thinking = '';
     let truncated = false;
     let speed = 0;
+    let tokens = null;
     await readLines(res, (line) => {
       let j;
       try {
@@ -124,8 +125,9 @@ const ollama = {
         if (onDelta) onDelta({ text, thinking });
       }
       if (j.done && j.done_reason === 'length') truncated = true;
+      if (j.done && j.eval_count) tokens = { in: j.prompt_eval_count || 0, out: j.eval_count };
     });
-    return { text, thinking, truncated, speed };
+    return { text, thinking, truncated, speed, tokens };
   },
 
   async contextLength(s, tag) {
@@ -325,6 +327,9 @@ async function listInstalled(settings) {
       out.remote = 'offline';
     }
   }
+  // a name the user gave a model replaces the technical one everywhere
+  const names = settings.modelNames || {};
+  for (const m of out.models) if (names[m.id]) m.name = names[m.id];
   return out;
 }
 
@@ -334,11 +339,12 @@ async function chat(settings, modelId, opts) {
   if (!p) throw new ProviderError('Unknown model source: ' + provider, 'config');
   const res = await p.chat(settings, { ...opts, model });
   const sent = (opts.messages || []).reduce((n, m) => n + String(m.content || '').length, 0);
-  usage.tokens(
-    modelId,
-    Math.ceil(sent / 3),
-    Math.ceil(((res.text || '').length + (res.thinking || '').length) / 3),
-  );
+  // without exact numbers from the engine, three characters to a token is a fair guess
+  const used = res.tokens || {
+    in: Math.ceil(sent / 3),
+    out: Math.ceil(((res.text || '').length + (res.thinking || '').length) / 3),
+  };
+  usage.tokens(modelId, used.in, used.out);
   return res;
 }
 

@@ -5,10 +5,41 @@ async function loadLib() {
   S.boot.hardware = S.lib.hw;
   S.engineInstall = S.lib.engine.install;
 }
+function renameModel(m) {
+  const input = h('input', {
+    class: 'input',
+    style: 'width:100%',
+    value: m.name,
+    maxlength: 60,
+    placeholder: m.tag,
+    'aria-label': t('Rename'),
+  });
+  const go = (close) =>
+    guard(async () => {
+      const names = { ...(S.boot.settings.modelNames || {}) };
+      const name = input.value.trim();
+      // an empty field brings the original name back
+      if (name && name !== m.tag) names[m.id] = name;
+      else delete names[m.id];
+      await saveSettings({ modelNames: names });
+      close();
+      await loadLib();
+      if (S.view === 'library') renderLibrary();
+    })();
+  const close = modal(t('Rename'), input, (c) => [
+    h('button', { class: 'btn', onclick: c }, t('Cancel')),
+    h('button', { class: 'btn primary', onclick: () => go(c) }, t('Save')),
+  ]);
+  input.addEventListener('keydown', (e) => e.key === 'Enter' && go(close));
+  input.select();
+}
+
 function engineBanner() {
   const e = S.lib.engine;
   if (e.online) return null;
   const inst = S.engineInstall;
+  // the engine installs itself with the first model, so there is nothing to ask for here
+  if (!inst && !e.installed && e.canInstall) return null;
   if (inst)
     return h(
       'div',
@@ -105,7 +136,7 @@ function renderLibrary() {
           'div',
           { class: 'grow' },
           h('div', { class: 'bar', style: 'margin:0 0 4px' }, h('i', { style: `width:${pull.percent}%` })),
-          pull.percent + '%',
+          (/engine/.test(pull.status) ? t(pull.status) + ' · ' : '') + pull.percent + '%',
         ),
         h(
           'button',
@@ -116,7 +147,7 @@ function renderLibrary() {
     else
       foot = [
         h('span', { class: 'grow' }, `${m.params}B · ${m.sizeGB} GB`),
-        L.ollama.online && m.rate.level !== 'no'
+        (L.ollama.online || (L.engine.canInstall && !L.engine.installed)) && m.rate.level !== 'no'
           ? h(
               'button',
               { class: 'btn sm primary', onclick: guard(() => startPull(m.tag)) },
@@ -199,6 +230,16 @@ function renderLibrary() {
             t('Test'),
           ),
         h('button', { class: 'btn sm', onclick: guard(() => patchOrNew({ model: m.id })) }, t('Chat')),
+        h(
+          'button',
+          {
+            class: 'btn sm ghost',
+            'aria-label': t('Rename'),
+            title: t('Rename'),
+            onclick: () => renameModel(m),
+          },
+          ic('edit'),
+        ),
         m.provider === 'ollama' &&
           h(
             'button',

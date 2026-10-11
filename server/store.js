@@ -43,6 +43,7 @@ const DEFAULT_SETTINGS = {
   webAccess: true,
   mcpServers: [],
   modelTests: {},
+  modelNames: {},
 };
 
 const readJson = (file, fallback) => {

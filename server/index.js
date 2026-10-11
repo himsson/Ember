@@ -64,9 +64,40 @@ async function library() {
       test: (settings.modelTests || {})[m.id] || null,
       testing: selftest.isRunning(m.id),
     })),
-    catalog: catalog.map((c) => ({ ...c, rate: hardware.rate(c.sizeGB, hw), installed: have.has(c.tag) })),
+    catalog: catalog.map((c) => ({
+      ...c,
+      name: (settings.modelNames || {})['ollama:' + c.tag] || c.name,
+      rate: hardware.rate(c.sizeGB, hw),
+      installed: have.has(c.tag),
+    })),
     pulls: Object.fromEntries([...pulls].map(([tag, p]) => [tag, { percent: p.percent, status: p.status }])),
   };
+}
+
+// Makes sure there is an engine to download the model with: starts it, or installs it first.
+async function readyEngine(p, tag) {
+  const s = store.getSettings();
+  if (await engine.ensure(s)) return;
+  const state = await engine.status(s);
+  if (state.installed) throw new Error('The engine did not start');
+  if (!state.canInstall) throw new Error('An engine is needed to run models');
+  const show = (ev) => {
+    if (ev.done) return;
+    p.status = ev.status;
+    p.percent = ev.percent;
+    broadcast({ type: 'pull', tag, percent: p.percent, status: p.status });
+  };
+  engine.bus.on('install', show);
+  try {
+    await engine.installEngine(s);
+    // someone else may have started the install a moment earlier
+    while ((await engine.status(s)).install) await new Promise((r) => setTimeout(r, 500));
+  } finally {
+    engine.bus.off('install', show);
+  }
+  if (!(await engine.ensure(s))) throw new Error('The engine did not start');
+  p.percent = 0;
+  p.status = '';
 }
 
 function startPull(tag) {
@@ -74,19 +105,21 @@ function startPull(tag) {
   const p = { percent: 0, status: '', abort: new AbortController() };
   pulls.set(tag, p);
   let last = 0;
-  providers.ollama
-    .pull(
-      store.getSettings(),
-      tag,
-      (ev) => {
-        p.status = ev.status || '';
-        if (ev.total) p.percent = Math.round((ev.completed / ev.total) * 100);
-        if (Date.now() - last > 300) {
-          last = Date.now();
-          broadcast({ type: 'pull', tag, percent: p.percent, status: p.status });
-        }
-      },
-      p.abort.signal,
+  readyEngine(p, tag)
+    .then(() =>
+      providers.ollama.pull(
+        store.getSettings(),
+        tag,
+        (ev) => {
+          p.status = ev.status || '';
+          if (ev.total) p.percent = Math.round((ev.completed / ev.total) * 100);
+          if (Date.now() - last > 300) {
+            last = Date.now();
+            broadcast({ type: 'pull', tag, percent: p.percent, status: p.status });
+          }
+        },
+        p.abort.signal,
+      ),
     )
     .then(() => broadcast({ type: 'pull', tag, done: true }))
     .catch((e) =>
