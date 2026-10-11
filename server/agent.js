@@ -14,6 +14,7 @@ let capture = null;
 const setCapture = (fn) => (capture = fn);
 const providers = require('./providers');
 const store = require('./store');
+const usage = require('./usage');
 const hardware = require('./hardware');
 const engine = require('./engine');
 const catalog = require('./catalog.json');
@@ -1153,6 +1154,7 @@ async function send(sid, text, images, attached) {
   if (!text && !pics.length && !hasDocs) return;
   if (!text)
     text = pics.length ? 'Look at the image.' : 'Read the attached document and tell me what is in it.';
+  usage.message(sid);
 
   store.ensureCwd(s);
   if (!s.items.length) s.title = text.replace(/\s+/g, ' ').slice(0, 48);

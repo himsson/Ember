@@ -3,6 +3,9 @@
 const S = {
   boot: null,
   view: 'chat',
+  usage: null,
+  stats: { tab: 'overview', range: 'all' },
+  showStarters: false,
   session: null,
   sessions: [],
   lib: null,

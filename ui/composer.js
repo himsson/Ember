@@ -83,6 +83,15 @@ function send(text, images, docs) {
 const COMMANDS = {
   compact: ['Compact context', 'shrink', () => guard(doCompact)()],
   clear: ['New chat', 'plus', () => guard(newChat)()],
+  ideas: [
+    'Ideas and templates',
+    'bolt',
+    () =>
+      guard(async () => {
+        S.showStarters = true;
+        await newChat();
+      })(),
+  ],
   undo: ['Undo file changes', 'undo', () => guard(() => undo())()],
   init: [
     'Create project notes EMBER.md',
@@ -108,6 +117,9 @@ function submit() {
   if (cmd && COMMANDS[cmd[1]] && !st().running) return COMMANDS[cmd[1]][2]();
   S.attach = [];
   S.docs = [];
+  S.showStarters = false;
+  S.usage = null;
+  if (S.boot.settings.starters !== false) guard(saveSettings)({ starters: false });
   if (st().running) S.queue.push({ text, images, docs });
   else send(text, images, docs);
   renderTray();

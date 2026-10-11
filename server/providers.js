@@ -1,4 +1,5 @@
 const engine = require('./engine');
+const usage = require('./usage');
 
 class ProviderError extends Error {
   constructor(message, code) {
@@ -331,7 +332,14 @@ async function chat(settings, modelId, opts) {
   const { provider, model } = split(modelId);
   const p = PROVIDERS[provider];
   if (!p) throw new ProviderError('Unknown model source: ' + provider, 'config');
-  return p.chat(settings, { ...opts, model });
+  const res = await p.chat(settings, { ...opts, model });
+  const sent = (opts.messages || []).reduce((n, m) => n + String(m.content || '').length, 0);
+  usage.tokens(
+    modelId,
+    Math.ceil(sent / 3),
+    Math.ceil(((res.text || '').length + (res.thinking || '').length) / 3),
+  );
+  return res;
 }
 
 module.exports = { ollama, remote, openai, chat, listInstalled, split, ProviderError };

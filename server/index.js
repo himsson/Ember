@@ -14,6 +14,7 @@ const mcp = require('./mcp');
 const gitx = require('./git');
 const docs = require('./docs');
 const voice = require('./voice');
+const usage = require('./usage');
 const share = require('./share');
 const TEMPLATES = path.join(__dirname, '..', 'templates');
 const { decodeOutput, SKIP_DIRS } = require('./tools');
@@ -216,6 +217,7 @@ const routes = {
     const text = await docs.extract(String(b.name || 'file'), buf);
     return { name: String(b.name || 'file'), text: text.slice(0, 40000), chars: text.length };
   },
+  'GET /api/usage': async () => usage.read(),
   'GET /api/voice': async () => voice.status(),
   'POST /api/voice/install': async () => {
     voice.install();

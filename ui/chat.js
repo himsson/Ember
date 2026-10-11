@@ -196,6 +196,52 @@ function renderEmpty() {
   );
   const who = S.boot.settings.userName;
   const noModels = S.lib && !realModels().length;
+  // Ideas and templates greet a new user once; after the first message the screen shows usage instead.
+  const starters = S.boot.settings.starters !== false || S.showStarters;
+  if (!starters && !S.usage) {
+    S.usage = {};
+    guard(async () => {
+      S.usage = await api('/api/usage');
+      if (S.view === 'chat' && !S.session.items.length) renderEmpty();
+    })();
+  }
+  const startersBlock = () => [
+    S.templates.length
+      ? h(
+          'div',
+          { class: 'tpls' },
+          S.templates.map((tp) =>
+            h(
+              'button',
+              {
+                class: 'tpl',
+                onclick: guard(async () => {
+                  const r = await api('/api/template', { id: S.session.id, template: tp.id });
+                  S.session.state.cwd = r.cwd;
+                  S.tree.cache.clear();
+                  S.panes.files = true;
+                  syncChrome();
+                  renderFilesPane();
+                  suggest(r.prompt);
+                }),
+              },
+              ic(tp.icon || 'file'),
+              t(tp.title),
+            ),
+          ),
+        )
+      : null,
+    h(
+      'div',
+      { class: 'suggest' },
+      [
+        ['globe', 'Make a business-card site for a photographer'],
+        ['code', 'Write a script that renames photos by date'],
+        ['phone', 'Make a notes app for Android'],
+        ['bug', 'Find and fix a bug in my project'],
+      ].map(([i, text]) => h('button', { onclick: () => suggest(t(text)) }, ic(i), h('span', {}, t(text)))),
+    ),
+  ];
   fill(
     col,
     h(
@@ -209,41 +255,7 @@ function renderEmpty() {
           h('b', {}, t('No models yet')),
           h('button', { class: 'btn primary', onclick: () => setView('library') }, ic('book'), t('Library')),
         ),
-      S.templates.length
-        ? h(
-            'div',
-            { class: 'tpls' },
-            S.templates.map((tp) =>
-              h(
-                'button',
-                {
-                  class: 'tpl',
-                  onclick: guard(async () => {
-                    const r = await api('/api/template', { id: S.session.id, template: tp.id });
-                    S.session.state.cwd = r.cwd;
-                    S.tree.cache.clear();
-                    S.panes.files = true;
-                    syncChrome();
-                    renderFilesPane();
-                    suggest(r.prompt);
-                  }),
-                },
-                ic(tp.icon || 'file'),
-                t(tp.title),
-              ),
-            ),
-          )
-        : null,
-      h(
-        'div',
-        { class: 'suggest' },
-        [
-          ['globe', 'Make a business-card site for a photographer'],
-          ['code', 'Write a script that renames photos by date'],
-          ['phone', 'Make a notes app for Android'],
-          ['bug', 'Find and fix a bug in my project'],
-        ].map(([i, text]) => h('button', { onclick: () => suggest(t(text)) }, ic(i), h('span', {}, t(text)))),
-      ),
+      ...(starters ? startersBlock() : [statsCard()]),
     ),
   );
 }

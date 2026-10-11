@@ -24,6 +24,7 @@ const DEFAULT_SETTINGS = {
   theme: 'dark',
   lang: 'en',
   onboarded: false,
+  starters: true,
   userName: '',
   userAddress: '',
   purpose: '',
